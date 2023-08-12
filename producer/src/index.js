@@ -1,7 +1,5 @@
 const common = require("../../common");
 const express = common.express;
-const axios = common.axios;
-const ampq = common.amqplib;
 const bodyParser = common.bodyParser;
 const Producer = require("./producer");
 
@@ -11,32 +9,41 @@ app.use(bodyParser.json("application/json"));
 const producer = new Producer();
 const port = 3000;
 
-// const idInstance = "7103846835";
-// const apiTokenInstance = "c3f52d0193c64979b46871ba218d4e318dceca7f61c046d49e";
-
 app.get("/settings", async (req, res) => {
     const data = req.body;
-    console.log(data);
-    console.log(data.logType);
     
-    await producer.publishMessage(data.logType, data);
+    await producer.publishMessage(data.reqType, data);
+    await producer.getResponse();
+
     res.send();
 });
 
-// app.get("/settings", (req, res) => {
+app.get("/state", async (req, res) => {
+    const data = req.body;
     
-//     const apiUrl = `https://api.green-api.com/waInstance${idInstance}/getSettings/${apiTokenInstance}`;
+    await producer.publishMessage(data.reqType, data);
+    await producer.getResponse();
+    
+    res.send();
+});
 
-//     axios.get(apiUrl)
-//         .then(response => {
-//             // console.log(response.data);
-//             res.json(response.data)
-//         })
-//         .catch(err => {
-//             console.error(err);
-//             res.sendStatus(500);
-//         });
-// });
+app.post("/sendMessage", async (req, res) => {
+    const data = req.body;
+    
+    await producer.publishMessage(data.reqType, data);
+    await producer.getResponse();
+    
+    res.send();
+});
+
+app.post("/sendFileByUrl", async (req, res) => {
+    const data = req.body;
+    
+    await producer.publishMessage(data.reqType, data);
+    await producer.getResponse();
+    
+    res.send();
+});
 
 app.listen(port, () => {
     console.log(`Producer app listening on port ${port}`);

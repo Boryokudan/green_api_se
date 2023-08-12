@@ -24,7 +24,24 @@ class Producer {
             Buffer.from(JSON.stringify(message))
         );
 
-        console.log(`The message ${message} is sent to exchange "${exchangeName}".`)
+        console.log(`The request ${message.action} is sent to exchange "${exchangeName}".`)
+    }
+
+    async getResponse() {
+        const exchangeName = config.rabbitMQ.responseExchangeName;
+        await this.channel.assertExchange(exchangeName, "direct");
+        const responseQueue = await this.channel.assertQueue("InfoResponseQueue");
+
+        this.channel.consume(responseQueue.queue, (msg) => {
+            try {
+                const data = JSON.parse(msg.content);
+                console.log(data);
+            } catch(err) {
+                console.error(err);
+            } finally {
+                this.channel.ack(msg);
+            }
+        });
     }
 }
 
