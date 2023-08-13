@@ -20,6 +20,7 @@
 // const loadingSpinner = document.getElementById("loadingSpinner");
 const getSettingsButton = document.getElementById("getSettingsButton");
 const getStateButton = document.getElementById("getStateInstanceButton");
+const responseArea = document.getElementById("responseArea");
 
 getSettingsButton.addEventListener("click", getSettings);
 getStateButton.addEventListener("click", getStateInstance);
@@ -42,8 +43,7 @@ async function getSettings() {
 
         if (response.ok) {
             const data = await response.json();
-            const responseArea = document.getElementById("responseArea");
-            responseArea.value = JSON.stringify(data, null, 2);
+            responseArea.textContent = JSON.stringify(data, null, 2);
         } else {
             console.error("Error:", response.statusText);
         }
@@ -70,8 +70,7 @@ async function getStateInstance() {
 
         if (response.ok) {
             const data = await response.json();
-            const responseArea = document.getElementById("responseArea");
-            responseArea.value = JSON.stringify(data, null, 2);
+            responseArea.textContent = JSON.stringify(data, null, 2);
         } else {
             console.error("Error:", response.statusText);
         }
@@ -127,7 +126,7 @@ document.getElementById("sendFileByUrlForm").addEventListener("submit", async fu
 
     const phoneNumber = document.getElementById("filePhoneNumber").value + "@c.us";
     const fileUrl = document.getElementById("url").value;
-    const fileName = url.substring(url.lastIndexOf("/") + 1);
+    const fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
 
     const postData = {
         chatId: phoneNumber,
