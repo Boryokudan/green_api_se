@@ -2,7 +2,7 @@ const common = require("../../common");
 const express = common.express;
 const axios = common.axios;
 
-async function processGetSettings(data, channel, responseExchangeName) {
+async function processGetSettings(channel, responseQueue, data, correlationId) {
     const idInstance = data.idInstance;
     const apiTokenInstance = data.apiTokenInstance;
 
@@ -10,17 +10,16 @@ async function processGetSettings(data, channel, responseExchangeName) {
 
     axios.get(apiUrl)
         .then(response => {
-            channel.publish(
-            responseExchangeName,
-            "Info",
-            Buffer.from(JSON.stringify(response.data)));
+            channel.sendToQueue(responseQueue, Buffer.from(JSON.stringify(response.data)), {
+                correlationId: correlationId
+            });
         })
         .catch(err => {
             console.error("Error: ", err);
         });
 };
 
-async function processGetState(data, channel, responseExchangeName) {
+async function processGetState(channel, responseQueue, data, correlationId) {
     const idInstance = data.idInstance;
     const apiTokenInstance = data.apiTokenInstance;
 
@@ -28,17 +27,16 @@ async function processGetState(data, channel, responseExchangeName) {
 
     axios.get(apiUrl)
         .then(response => {
-            channel.publish(
-            responseExchangeName,
-            "Info",
-            Buffer.from(JSON.stringify(response.data)));
+            channel.sendToQueue(responseQueue, Buffer.from(JSON.stringify(response.data)), {
+                correlationId: correlationId
+            });
         })
         .catch(err => {
             console.error("Error: ", err);
         });
 };
 
-async function processSendMessage(data, channel, responseExchangeName) {
+async function processSendMessage(channel, responseQueue, data, correlationId) {
     const idInstance = data.idInstance;
     const apiTokenInstance = data.apiTokenInstance;
 
@@ -55,17 +53,16 @@ async function processSendMessage(data, channel, responseExchangeName) {
         }
         })
         .then(response => {
-            channel.publish(
-            responseExchangeName,
-            "Info",
-            Buffer.from(JSON.stringify(response.data)));
+            channel.sendToQueue(responseQueue, Buffer.from(JSON.stringify(response.data)), {
+                correlationId: correlationId
+            });
         })
         .catch(err => {
             console.error("Error: ", err);
         });
 };
 
-async function processSendFileByUrl(data, channel, responseExchangeName) {
+async function processSendFileByUrl(channel, responseQueue, data, correlationId) {
     const idInstance = data.idInstance;
     const apiTokenInstance = data.apiTokenInstance;
 
@@ -83,10 +80,9 @@ async function processSendFileByUrl(data, channel, responseExchangeName) {
         }
         })
         .then(response => {
-            channel.publish(
-            responseExchangeName,
-            "Info",
-            Buffer.from(JSON.stringify(response.data)));
+            channel.sendToQueue(responseQueue, Buffer.from(JSON.stringify(response.data)), {
+                correlationId: correlationId
+            });
         })
         .catch(err => {
             console.error("Error: ", err);

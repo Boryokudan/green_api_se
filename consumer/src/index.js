@@ -1,42 +1,39 @@
 const common = require("../../common");
 const config = require("../../common/config/config");
+const AmqpConnection = require("../../common/src/amqp_connection");
 const handlers = require("./handlers");
 const amqp = common.amqplib;
 
 async function consumeMessages() {
-    const connection = await amqp.connect(config.rabbitMQ.url);
+    const connection = await AmqpConnection.connect(config.rabbitMQ.url);
     const channel = await connection.createChannel();
-    const requestExchangeName = config.rabbitMQ.requestExchangeName;
-    const responseExchangeName = config.rabbitMQ.responseExchangeName;
 
-    await channel.assertExchange(requestExchangeName, "direct");
-    await channel.assertExchange(responseExchangeName, "direct");
+    const requestQueue = config.rabbitMQ.requestQueueName;
+    const responseQueue = config.rabbitMQ.responseQueueName;
 
-    const requestQueue = await channel.assertQueue("InfoRequestQueue");
-    const responseQueue = await channel.assertQueue("InfoResponseQueue");
+    await channel.assertQueue(requestQueue);
+    await channel.assertQueue(responseQueue);
 
-    await channel.bindQueue(requestQueue.queue, requestExchangeName, "Info");
-    await channel.bindQueue(responseQueue.queue, responseExchangeName, "Info");
-
-    channel.consume(requestQueue.queue, async (msg) => {
-        const data = JSON.parse(msg.content);
+    channel.consume(requestQueue, (message) => {
+        const data = JSON.parse(message.content);
+        const correlationId = message.properties.correlationId;
         
         try {
             switch(data.action) {
-                case "getSettings": await handlers.processGetSettings(data, channel, responseExchangeName);
+                case "getSettings": handlers.processGetSettings(channel, responseQueue, data, correlationId);
                     break;
-                case "getState": await handlers.processGetState(data, channel, responseExchangeName);
+                case "getState": handlers.processGetState(channel, responseQueue, data, correlationId);
                     break;
-                case "sendMessage": await handlers.processSendMessage(data, channel, responseExchangeName);
+                case "sendMessage": handlers.processSendMessage(channel, responseQueue, data, correlationId);
                     break;
-                case "sendFileByUrl": await handlers.processSendFileByUrl(data, channel, responseExchangeName);
+                case "sendFileByUrl": handlers.processSendFileByUrl(channel, responseQueue, data, correlationId);
                     break;
             }
         } catch(err) {
             console.error("Error: ", err);
         } finally {
-            console.log(`${new Date} Processed "${data.action}" request from exchange "${requestExchangeName}".`)
-            channel.ack(msg);
+            console.log(`${new Date} Processed "${data.action}" request from queue "${requestQueue}".`)
+            channel.ack(message);
         }
     });
 }
