@@ -18,23 +18,24 @@ async function consumeMessages() {
     await channel.bindQueue(requestQueue.queue, requestExchangeName, "Info");
     await channel.bindQueue(responseQueue.queue, responseExchangeName, "Info");
 
-    channel.consume(requestQueue.queue, (msg) => {
+    channel.consume(requestQueue.queue, async (msg) => {
         const data = JSON.parse(msg.content);
         
         try {
             switch(data.action) {
-                case "getSettings": handlers.processGetSettings(data, channel, responseExchangeName);
+                case "getSettings": await handlers.processGetSettings(data, channel, responseExchangeName);
                     break;
-                case "getState": handlers.processGetState(data, channel, responseExchangeName);
+                case "getState": await handlers.processGetState(data, channel, responseExchangeName);
                     break;
-                case "sendMessage": handlers.processSendMessage(data, channel, responseExchangeName);
+                case "sendMessage": await handlers.processSendMessage(data, channel, responseExchangeName);
                     break;
-                case "sendFileByUrl": handlers.processSendFileByUrl(data, channel, responseExchangeName);
+                case "sendFileByUrl": await handlers.processSendFileByUrl(data, channel, responseExchangeName);
                     break;
             }
         } catch(err) {
             console.error("Error: ", err);
         } finally {
+            console.log(`${new Date} Processed "${data.action}" request from exchange "${requestExchangeName}".`)
             channel.ack(msg);
         }
     });

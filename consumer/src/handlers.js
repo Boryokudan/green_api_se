@@ -45,8 +45,8 @@ async function processSendMessage(data, channel, responseExchangeName) {
     const apiUrl = `https://api.green-api.com/waInstance${idInstance}/sendMessage/${apiTokenInstance}`;
 
     const postData = {
-        chatId: data.phoneNumber,
-        message: data.messageContent
+        chatId: data.chatId,
+        message: data.message
     };
 
     axios.post(apiUrl, postData, {
@@ -72,8 +72,8 @@ async function processSendFileByUrl(data, channel, responseExchangeName) {
     const apiUrl = `https://api.green-api.com/waInstance${idInstance}/sendFileByUrl/${apiTokenInstance}`;
 
     const postData = {
-        chatId: data.phoneNumber,
-        urlFile: data.url,
+        chatId: data.chatId,
+        urlFile: data.urlFile,
         fileName: data.fileName
     };
 
